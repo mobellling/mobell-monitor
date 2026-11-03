@@ -4,6 +4,10 @@ options:
   deploymentTarget:
     iOS: "16.0"
   createIntermediateGroups: true
+  # XcodeGen >= 2.44 defaults to the Xcode 16 project format (objectVersion 77),
+  # which Xcode 15.x cannot open. Pin the older format so the project works on
+  # both Xcode 15.4 (macos-14) and newer Xcode versions.
+  projectFormat: xcode15_3
 settings:
   base:
     SWIFT_VERSION: "5.9"
