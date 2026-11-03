@@ -98,7 +98,7 @@ final class Bridge: NSObject, WKScriptMessageHandler {
 
         case "openExternal":
             if let raw = args.first as? String, let url = URL(string: raw) {
-                UIApplication.shared.open(url)
+                _ = await UIApplication.shared.open(url)
             }
             return ["ok": true]
 
