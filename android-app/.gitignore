@@ -1,0 +1,13 @@
+# Build outputs
+.gradle/
+build/
+app/build/
+*.iml
+.idea/
+
+# Local machine configuration
+local.properties
+
+# Signing secrets (keystore + passwords stay local to the build machine)
+keystore.properties
+keystore/*.jks

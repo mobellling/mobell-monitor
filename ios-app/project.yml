@@ -1,0 +1,34 @@
+name: MobellMonitor
+options:
+  bundleIdPrefix: com.mobell
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""
+targets:
+  MobellMonitor:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mobell.monitor
+        PRODUCT_NAME: MobellMonitor
+        MARKETING_VERSION: "1.1.0"
+        CURRENT_PROJECT_VERSION: "2"
+        INFOPLIST_FILE: Info.plist
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+schemes:
+  MobellMonitor:
+    build:
+      targets:
+        MobellMonitor: all
+    run:
+      config: Release

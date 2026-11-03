@@ -1,0 +1,25 @@
+{
+  "name": "mobell-monitor",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Mobell 博客监控与 GitHub 发布应用",
+  "main": "desktop/main.js",
+  "scripts": {
+    "build:web": "node scripts/build-web.js",
+    "start": "npm run build:web && electron .",
+    "test": "node --test \"test/*.test.js\"",
+    "pack:win": "npm run build:web && node scripts/pack-win.js",
+    "icon": "node scripts/gen-icon.js"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "electron": "45.2.1",
+    "esbuild": "0.28.2",
+    "limax": "4.2.3",
+    "png-to-ico": "3.0.2",
+    "yaml": "2.9.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xml:lang="en-US">
+  <id>tag:github.com,2008:/mobellling/mobellling.github.io/commits/master</id>
+  <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commits/master"/>
+  <link type="application/atom+xml" rel="self" href="https://github.com/mobellling/mobellling.github.io/commits/master.atom"/>
+  <title>Recent Commits to mobellling.github.io:master</title>
+  <updated>2026-11-03T06:31:48Z</updated>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/26fdd655f414ee972cf2bd1bedef3a6a32462ab8</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/26fdd655f414ee972cf2bd1bedef3a6a32462ab8"/>
+    <title>
+        fix: 更新去重时间常量，将 DEDUPE_MS 设置为 600 秒
+    </title>
+    <updated>2026-11-03T06:31:48Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;fix: 更新去重时间常量，将 DEDUPE_MS 设置为 600 秒&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/329378df73daa0369f122b8481bd74de5fc30d4b</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/329378df73daa0369f122b8481bd74de5fc30d4b"/>
+    <title>
+        feat: 添加页面和站点访问量统计功能，使用 Vercount 服务更新阅读量
+    </title>
+    <updated>2026-11-03T06:17:29Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;feat: 添加页面和站点访问量统计功能，使用 Vercount 服务更新阅读量&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/4f8f201a4379be16162eb348ca827da703f95449</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/4f8f201a4379be16162eb348ca827da703f95449"/>
+    <title>
+        feat: add end-to-end service worker tests and client-side API
+    </title>
+    <updated>2026-11-02T14:02:33Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;feat: add end-to-end service worker tests and client-side API
+
+- Introduced `sw-e2e.mjs` for end-to-end testing of the service worker using headless Chrome.
+- Created `ServiceWorker.astro` component to register the service worker and initialize the client API.
+- Implemented `sw-client.ts` to provide a comprehensive client-side API for interacting with the service worker, including methods for status checks, manifest synchronization, prefetching, and cache management.
+- Added debug panel functionality for easier service worker management during development.&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/1c9927c3ad5afc6861960f8ea7b027ebb67ecc48</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/1c9927c3ad5afc6861960f8ea7b027ebb67ecc48"/>
+    <title>
+        新增关于在安卓设备上实现Linux的教程，包含准备工具、操作步骤及常见问题解答
+    </title>
+    <updated>2026-10-31T04:01:29Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;新增关于在安卓设备上实现Linux的教程，包含准备工具、操作步骤及常见问题解答&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/677a12fc7cf8ae4a12e3b9c0e9d4a0a87863483a</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/677a12fc7cf8ae4a12e3b9c0e9d4a0a87863483a"/>
+    <title>
+        Correct &#39;herf&#39; to &#39;href&#39; in navigation
+    </title>
+    <updated>2026-10-30T01:06:26Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Correct &amp;#39;herf&amp;#39; to &amp;#39;href&amp;#39; in navigation
+
+Fix typo in DeepSeek API documentation link.&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/5fb7079ee23d35b229c3adf2eea0a876a8228d3f</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/5fb7079ee23d35b229c3adf2eea0a876a8228d3f"/>
+    <title>
+        更新文章中的图片链接，确保资源可用性
+    </title>
+    <updated>2026-10-29T14:22:53Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;更新文章中的图片链接，确保资源可用性&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/a86a1b8ed397fb58d15175e2aca6059e12ccb716</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/a86a1b8ed397fb58d15175e2aca6059e12ccb716"/>
+    <title>
+        优化数学试题讲解文章中的公式排版，提升可读性
+    </title>
+    <updated>2026-10-29T14:16:32Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;优化数学试题讲解文章中的公式排版，提升可读性&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/0d9f6d1c10dd45f419b73ddb80dbcd6b0a53cf98</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/0d9f6d1c10dd45f419b73ddb80dbcd6b0a53cf98"/>
+    <title>
+        Refactor code structure for improved readability and maintainability
+    </title>
+    <updated>2026-10-29T14:09:15Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Refactor code structure for improved readability and maintainability&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/d322dd1d15f91ff3b75b740334a35343257c0d63</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/d322dd1d15f91ff3b75b740334a35343257c0d63"/>
+    <title>
+        Refactor code structure for improved readability and maintainability
+    </title>
+    <updated>2026-10-29T14:04:23Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Refactor code structure for improved readability and maintainability&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/ff8b4ebd2e7a459d2b04d7124bdfc0120e1d1798</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/ff8b4ebd2e7a459d2b04d7124bdfc0120e1d1798"/>
+    <title>
+        Merge branch &#39;master&#39; of https://github.com/mobellling/blog
+    </title>
+    <updated>2026-10-29T13:55:15Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Merge branch &amp;#39;master&amp;#39; of https://github.com/mobellling/blog&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/aa193a292d696e4f971ec811718144b97c987108</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/aa193a292d696e4f971ec811718144b97c987108"/>
+    <title>
+        删除Footer组件中的访客统计区域，移除不必要的图片文件，并新增高等数学期中考试试题讲解文章
+    </title>
+    <updated>2026-10-29T13:55:06Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;删除Footer组件中的访客统计区域，移除不必要的图片文件，并新增高等数学期中考试试题讲解文章&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/e4921cc2b7dfcb69617ad762f301f09f0e8effa7</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/e4921cc2b7dfcb69617ad762f301f09f0e8effa7"/>
+    <title>
+        Change image source to webp format
+    </title>
+    <updated>2026-10-29T07:20:59Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Change image source to webp format
+
+Updated image URL to use a webp format for better performance.&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/051e43445be3cfc7b74b8c459eef18bfb993fdc8</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/051e43445be3cfc7b74b8c459eef18bfb993fdc8"/>
+    <title>
+        Update 潮汐_潭水.md
+    </title>
+    <updated>2026-10-29T07:19:51Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Update 潮汐_潭水.md&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/50abf131101dc70e7a528f94fe33b84871e6a9cc</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/50abf131101dc70e7a528f94fe33b84871e6a9cc"/>
+    <title>
+        Update 故事.md
+    </title>
+    <updated>2026-10-29T07:18:43Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Update 故事.md&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/877bedec23ef44798718a5ed815ec57a404fe8e3</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/877bedec23ef44798718a5ed815ec57a404fe8e3"/>
+    <title>
+        Change image format to WEBP in Arrogance.md
+    </title>
+    <updated>2026-10-29T07:07:05Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Change image format to WEBP in Arrogance.md
+
+Updated image format from JPG to WEBP for better optimization.&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/ca0f022a9ea5a50374e5b2b79b4ced7649d1441a</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/ca0f022a9ea5a50374e5b2b79b4ced7649d1441a"/>
+    <title>
+        Update site description and posts per page
+    </title>
+    <updated>2026-10-29T06:47:59Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Update site description and posts per page&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/813624d874281769873b24180dc1e32d61a30aa0</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/813624d874281769873b24180dc1e32d61a30aa0"/>
+    <title>
+        Change prefetch default strategy from &#39;viewport&#39; to &#39;tap&#39;
+    </title>
+    <updated>2026-10-29T06:39:43Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Change prefetch default strategy from &amp;#39;viewport&amp;#39; to &amp;#39;tap&amp;#39;&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/7bc2babf833fb41bd2005c2cc9cf9107023181fd</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/7bc2babf833fb41bd2005c2cc9cf9107023181fd"/>
+    <title>
+        Merge branch &#39;master&#39; of https://github.com/mobellling/blog
+    </title>
+    <updated>2026-10-29T04:39:59Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Merge branch &amp;#39;master&amp;#39; of https://github.com/mobellling/blog&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/c78ac7291a7dd105e2baf44a02582949681fe34c</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/c78ac7291a7dd105e2baf44a02582949681fe34c"/>
+    <title>
+        更新Sharpness文章中的图片链接
+    </title>
+    <updated>2026-10-29T04:39:56Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/101485558?s=30&amp;v=4"/>
+    <author>
+      <name>Xzmumi</name>
+      <uri>https://github.com/Xzmumi</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;更新Sharpness文章中的图片链接&lt;/pre&gt;
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/b78b56b01d8118d24fb41e6f55afcf4a1e40f375</id>
+    <link type="text/html" rel="alternate" href="https://github.com/mobellling/mobellling.github.io/commit/b78b56b01d8118d24fb41e6f55afcf4a1e40f375"/>
+    <title>
+        Update navigation.ts
+    </title>
+    <updated>2026-10-29T03:53:54Z</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/284204817?s=30&amp;v=4"/>
+    <author>
+      <name>mobellling</name>
+      <uri>https://github.com/mobellling</uri>
+    </author>
+    <content type="html">
+      &lt;pre style=&#39;white-space:pre-wrap;width:81ex&#39;&gt;Update navigation.ts&lt;/pre&gt;
+    </content>
+  </entry>
+</feed>

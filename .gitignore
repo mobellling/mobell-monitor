@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Local build tools and caches
+.tools/
+dist/
+tmp/
+*.log
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+
+# Local secrets (never commit)
+.env
+.env.*

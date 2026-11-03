@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="mobell_bg">#0F1115</color>
+    <color name="mobell_card">#1A1F2B</color>
+    <color name="mobell_border">#2A3242</color>
+    <color name="mobell_text">#F2F5F9</color>
+    <color name="mobell_muted">#9AA5B8</color>
+    <color name="mobell_accent">#4F8DFD</color>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mobell 博客监控</string>
+    <string name="widget_label">Mobell 博客监控</string>
+    <string name="widget_refresh">刷新</string>
+    <string name="error_load_failed">页面加载失败</string>
+</resources>

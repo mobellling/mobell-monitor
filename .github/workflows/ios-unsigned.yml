@@ -1,0 +1,60 @@
+name: iOS unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build shared web app
+        run: npm run build:web
+
+      - name: Stage web app into iOS resources
+        run: |
+          mkdir -p ios-app/Resources
+          cp dist/web/app.html ios-app/Resources/app.html
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios-app
+        run: xcodegen generate
+
+      - name: Build unsigned app
+        working-directory: ios-app
+        run: |
+          xcodebuild \
+            -project MobellMonitor.xcodeproj \
+            -scheme MobellMonitor \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -R ios-app/build/Build/Products/Release-iphoneos/MobellMonitor.app Payload/
+          zip -qry MobellMonitor-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MobellMonitor-unsigned-ipa
+          path: MobellMonitor-unsigned.ipa

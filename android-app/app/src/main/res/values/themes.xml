@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Mobell" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/mobell_bg</item>
+        <item name="android:statusBarColor">@color/mobell_bg</item>
+        <item name="android:navigationBarColor">@color/mobell_bg</item>
+        <item name="android:colorAccent">@color/mobell_accent</item>
+    </style>
+</resources>
