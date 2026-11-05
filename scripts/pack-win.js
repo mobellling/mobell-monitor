@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { packager } = require('@electron/packager');
@@ -11,6 +12,23 @@ const version = pkg.version;
 const outDir = path.join(root, 'dist', 'windows');
 const zipPath = path.join(outDir, `MobellMonitor-${version}-win64.zip`);
 
+// Reuse the Electron zip downloaded by `npm install` when github.com is slow
+// or unreachable; @electron/packager otherwise re-downloads it.
+function findElectronZipDir(electronVersion) {
+  const cacheRoot = path.join(
+    process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'),
+    'electron',
+    'Cache',
+  );
+  if (!fs.existsSync(cacheRoot)) return null;
+  const fileName = `electron-v${electronVersion}-win32-x64.zip`;
+  for (const entry of fs.readdirSync(cacheRoot)) {
+    const dir = path.join(cacheRoot, entry);
+    if (fs.statSync(dir).isDirectory() && fs.existsSync(path.join(dir, fileName))) return dir;
+  }
+  return null;
+}
+
 async function main() {
   if (!fs.existsSync(path.join(root, 'dist', 'web', 'app.html'))) {
     throw new Error('缺少 dist/web/app.html，请先运行 npm run build:web');
@@ -19,6 +37,8 @@ async function main() {
     throw new Error('缺少 build/icon.ico，请先运行 npm run icon');
   }
   fs.mkdirSync(outDir, { recursive: true });
+  const electronVersion = require('electron/package.json').version;
+  const electronZipDir = findElectronZipDir(electronVersion);
 
   const appPaths = await packager({
     dir: root,
@@ -27,7 +47,8 @@ async function main() {
     appVersion: version,
     platform: 'win32',
     arch: 'x64',
-    electronVersion: require('electron/package.json').version,
+    electronVersion,
+    ...(electronZipDir ? { electronZipDir } : {}),
     icon: path.join(root, 'build', 'icon.ico'),
     overwrite: true,
     prune: true,
