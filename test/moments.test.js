@@ -43,6 +43,15 @@ test('buildMomentFiles emits frontmatter with date and image paths', () => {
   assert.equal(result.commitMessage, 'moments: 添加动态 2026-11-05');
 });
 
+test('buildMomentFiles emits webp paths for converted images', () => {
+  const webp = { mime: 'image/webp', name: 'photo.png', size: 1024, base64: Buffer.from('fake-image').toString('base64') };
+  const result = buildMomentFiles(Object.assign({}, baseDraft, { images: [webp] }), {
+    siteUrl: 'https://mobellling.github.io',
+  });
+  assert.match(result.markdown, /20261105123000-1\.webp/);
+  assert.equal(result.files[1].path, 'public/images/moments/20261105123000-1.webp');
+});
+
 test('createMomentPublisher commits markdown and images atomically', async () => {
   const calls = [];
   const transport = {

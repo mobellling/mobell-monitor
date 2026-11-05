@@ -60,6 +60,16 @@ test('buildPostFiles adds cover upload and draft flag', () => {
   assert.match(result.commitMessage, /保存草稿/);
 });
 
+test('buildPostFiles uses webp extension for converted covers', () => {
+  const result = buildPostFiles(Object.assign({}, baseDraft, {
+    cover: { mime: 'image/webp', name: 'photo.png', size: 1024, base64: Buffer.from('fake').toString('base64') },
+  }));
+  const cover = result.files.find((file) => file.binary);
+  assert.ok(cover);
+  assert.match(cover.path, /\.webp$/);
+  assert.match(result.markdown, /image: '~\/src\/assets\/images\/uploads\/.+\.webp'/);
+});
+
 test('createPublisher performs atomic Git Data API sequence', async () => {
   const calls = [];
   const transport = {

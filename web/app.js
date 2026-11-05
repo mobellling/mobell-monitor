@@ -765,7 +765,7 @@ function renderPublish() {
               <button class="btn ghost" type="button" data-action="pick-cover">选择图片</button>
               ${cover ? '<button class="btn ghost" type="button" data-action="clear-cover">移除</button>' : ''}
               <input data-field="coverUrl" value="${escapeHtml(draft.coverUrl)}" placeholder="或填写图片 URL">
-              <div class="hint">支持 JPG/PNG/WebP，不超过 5MB；选择图片后无需填写 URL。</div>
+              <div class="hint">支持 JPG/PNG/WebP，不超过 5MB；上传后自动转为 WebP（保留透明背景）。</div>
               ${error && error.fields && error.fields.cover ? `<div class="field-error">${escapeHtml(error.fields.cover)}</div>` : ''}
             </div>
           </div>
@@ -861,7 +861,7 @@ function renderMoments() {
           ${error && error.fields && error.fields.date ? `<div class="field-error">${escapeHtml(error.fields.date)}</div>` : ''}
         </div>
         <div class="field">
-          <label>图片（最多 ${DEFAULTS.moments.maxImages} 张，每张不超过 5MB）</label>
+          <label>图片（最多 ${DEFAULTS.moments.maxImages} 张，每张不超过 5MB，自动转为 WebP）</label>
           ${
             images.length
               ? `<div class="moment-grid">${images.map((image, index) => `
@@ -1264,12 +1264,15 @@ async function loadCover(file) {
     showToast('封面不能超过 5MB', 'err');
     return;
   }
-  const dataUrl = await readFileAsDataUrl(file);
-  const base64 = String(dataUrl).replace(/^data:[^;]+;base64,/, '');
-  state.publish.cover = { base64, mime: file.type, name: file.name, size: file.size };
-  state.publish.draft.coverUrl = '';
-  state.publish.error = null;
-  render();
+  try {
+    const image = await prepareImage(file, { maxEdge: 1800, quality: 0.88 });
+    state.publish.cover = { base64: image.base64, mime: image.mime, name: image.name, size: image.size };
+    state.publish.draft.coverUrl = '';
+    state.publish.error = null;
+    render();
+  } catch (error) {
+    showToast(`${file.name} 读取失败`, 'err');
+  }
 }
 
 function scheduleMomentDraftSave() {
@@ -1300,19 +1303,8 @@ async function addMomentImages(fileList) {
       continue;
     }
     try {
-      const dataUrl = await readFileAsDataUrl(file);
-      let base64 = String(dataUrl).replace(/^data:[^;]+;base64,/, '');
-      let mime = file.type;
-      let size = file.size;
-      if (file.size > 1.5 * 1024 * 1024) {
-        const compressed = await compressImage(dataUrl);
-        if (compressed && compressed.size < file.size) {
-          base64 = compressed.base64;
-          mime = compressed.mime;
-          size = compressed.size;
-        }
-      }
-      added.push({ base64, mime, name: file.name, size });
+      const image = await prepareImage(file, { maxEdge: 1600, quality: 0.86 });
+      added.push({ base64: image.base64, mime: image.mime, name: image.name, size: image.size });
     } catch (error) {
       showToast(`${file.name} 读取失败`, 'err');
     }
@@ -1323,7 +1315,7 @@ async function addMomentImages(fileList) {
   render();
 }
 
-function compressImage(dataUrl, maxEdge = 1600, quality = 0.85) {
+function encodeImage(dataUrl, { mime, maxEdge = 1600, quality = 0.86 } = {}) {
   return new Promise((resolve) => {
     const image = new Image();
     image.onload = () => {
@@ -1335,16 +1327,17 @@ function compressImage(dataUrl, maxEdge = 1600, quality = 0.85) {
         const context = canvas.getContext('2d');
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         canvas.toBlob((blob) => {
-          if (!blob) return resolve(null);
+          if (!blob || blob.type !== mime) return resolve(null);
           const reader = new FileReader();
-          reader.onload = () => resolve({
-            base64: String(reader.result).replace(/^data:[^;]+;base64,/, ''),
-            mime: 'image/jpeg',
-            size: blob.size,
-          });
+          reader.onload = () =>
+            resolve({
+              base64: String(reader.result).replace(/^data:[^;]+;base64,/, ''),
+              mime,
+              size: blob.size,
+            });
           reader.onerror = () => resolve(null);
           reader.readAsDataURL(blob);
-        }, 'image/jpeg', quality);
+        }, mime, quality);
       } catch (error) {
         resolve(null);
       }
@@ -1352,6 +1345,31 @@ function compressImage(dataUrl, maxEdge = 1600, quality = 0.85) {
     image.onerror = () => resolve(null);
     image.src = dataUrl;
   });
+}
+
+async function prepareImage(file, { maxEdge = 1600, quality = 0.86 } = {}) {
+  const dataUrl = await readFileAsDataUrl(file);
+  const base64 = String(dataUrl).replace(/^data:[^;]+;base64,/, '');
+  const original = { base64, mime: file.type, size: file.size, name: file.name };
+  const limit = DEFAULTS.publish.maxCoverBytes;
+
+  if (file.type === 'image/webp') {
+    if (file.size > 1.5 * 1024 * 1024) {
+      const shrunk = await encodeImage(dataUrl, { mime: 'image/webp', maxEdge, quality });
+      if (shrunk && shrunk.size < file.size) return { ...shrunk, name: file.name };
+    }
+    return original;
+  }
+
+  const webp = await encodeImage(dataUrl, { mime: 'image/webp', maxEdge, quality });
+  if (webp && webp.size <= limit) return { ...webp, name: file.name };
+
+  // 极少数环境不支持 canvas 导出 WebP，退回到原图（仍满足大小限制）。
+  if (file.size > 1.5 * 1024 * 1024) {
+    const jpeg = await encodeImage(dataUrl, { mime: 'image/jpeg', maxEdge, quality });
+    if (jpeg && jpeg.size < file.size) return { ...jpeg, name: file.name };
+  }
+  return original;
 }
 
 async function submitMoment() {
