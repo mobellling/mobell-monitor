@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 
 const DEFAULTS = {
   version: VERSION,
@@ -39,6 +39,16 @@ const DEFAULTS = {
     postDir: 'src/data/post',
     uploadDir: 'src/assets/images/uploads',
     maxCoverBytes: 5 * 1024 * 1024,
+  },
+  moments: {
+    owner: 'mobellling',
+    repo: 'mobellling.github.io',
+    branch: 'master',
+    dir: 'src/data/moments',
+    imageDir: 'public/images/moments',
+    maxText: 2000,
+    maxImages: 6,
+    maxImageBytes: 5 * 1024 * 1024,
   },
 };
 

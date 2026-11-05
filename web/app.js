@@ -7,6 +7,7 @@ const { DEFAULTS, VERSION } = require('../core/config');
 const { slugify } = require('../core/slug');
 const sources = require('../core/sources');
 const { createPublisher, waitForDeploy } = require('../core/publish');
+const { createMomentPublisher, waitForMomentDeploy } = require('../core/moments');
 const { renderMarkdown, draftStats } = require('../core/markdown');
 const { checkForUpdate } = require('../core/updates');
 const { createPlatform } = require('./platform');
@@ -14,6 +15,20 @@ const YAML = require('yaml');
 
 const platform = createPlatform();
 const githubApi = (path) => platform.github.request({ method: 'GET', path });
+
+async function githubText(url) {
+  const parsed = new URL(url, DEFAULTS.siteUrl);
+  if (parsed.origin !== 'https://api.github.com') return platform.httpText(url);
+  const path = `${parsed.pathname}${parsed.search}`;
+  const response = await platform.github.request({ method: 'GET', path });
+  if (response.status === 404) throw new Error(`HTTP 404: ${url}`);
+  if (response.status < 200 || response.status >= 300) {
+    const message = response.json && response.json.message ? `: ${response.json.message}` : '';
+    throw new Error(`HTTP ${response.status}${message}`);
+  }
+  return JSON.stringify(response.json == null ? {} : response.json);
+}
+
 const appRoot = () => document.getElementById('app');
 
 const SETTINGS_DEFAULT = {
@@ -44,6 +59,18 @@ const state = {
     slugTouched: false,
     cancelDeploy: false,
   },
+  moments: {
+    draft: freshMomentDraft(),
+    images: [],
+    progress: [],
+    result: null,
+    error: null,
+    deploying: false,
+    deployAttempts: 0,
+    deployResult: null,
+    cancelDeploy: false,
+    saving: false,
+  },
   tokenPresent: false,
   tokenLogin: '',
   sort: 'date',
@@ -67,6 +94,10 @@ function freshDraft() {
     draft: false,
     slugOverride: '',
   };
+}
+
+function freshMomentDraft() {
+  return { text: '', date: toLocalInput(new Date()) };
 }
 
 function toLocalInput(value) {
@@ -115,6 +146,10 @@ function canPublishNow() {
   return !isMobile() || Boolean(state.tokenPresent);
 }
 
+function canMomentsNow() {
+  return Boolean(state.tokenPresent);
+}
+
 function updateVisible() {
   return Boolean(state.updates.info)
     && state.updates.dismissed !== state.updates.info.version;
@@ -129,9 +164,10 @@ function saveSnapshot() {
 async function init() {
   await loadSettings();
   applyWindowPrefs();
-  const [cached, draft, dismissed] = await Promise.all([
+  const [cached, draft, momentDraft, dismissed] = await Promise.all([
     platform.storage.get('snapshot', null).catch(() => null),
     platform.storage.get('publishDraft', null).catch(() => null),
+    platform.storage.get('momentDraft', null).catch(() => null),
     platform.storage.get(DEFAULTS.updates.dismissedKey, null).catch(() => null),
   ]);
   if (cached && cached.posts) state.snapshot = cached;
@@ -140,12 +176,19 @@ async function init() {
     state.publish.draft = Object.assign(freshDraft(), draft);
     state.publish.draft.publishDate = draft.publishDate || toLocalInput(new Date());
   }
+  if (momentDraft && typeof momentDraft === 'object' && !state.mini) {
+    state.moments.draft = Object.assign(freshMomentDraft(), {
+      text: String(momentDraft.text || ''),
+      date: momentDraft.date || toLocalInput(new Date()),
+    });
+  }
   try {
     state.tokenPresent = await platform.token.has();
   } catch (error) {
     state.tokenPresent = false;
   }
   if (!canPublishNow() && state.tab === 'publish') state.tab = 'overview';
+  if (!canMomentsNow() && state.tab === 'moments') state.tab = 'overview';
   bindEvents();
   render();
   startTicker();
@@ -507,11 +550,13 @@ function renderShell() {
       <nav class="tabs">
         <button class="tab ${state.tab === 'overview' ? 'active' : ''}" data-tab="overview">概览</button>
         ${canPublishNow() ? `<button class="tab ${state.tab === 'publish' ? 'active' : ''}" data-tab="publish">发布</button>` : ''}
+        ${canMomentsNow() ? `<button class="tab ${state.tab === 'moments' ? 'active' : ''}" data-tab="moments">动态</button>` : ''}
         <button class="tab ${state.tab === 'settings' ? 'active' : ''}" data-tab="settings">设置</button>
       </nav>
       <main class="content">
         ${state.tab === 'overview' ? renderOverview() : ''}
         ${state.tab === 'publish' && canPublishNow() ? renderPublish() : ''}
+        ${state.tab === 'moments' && canMomentsNow() ? renderMoments() : ''}
         ${state.tab === 'settings' ? renderSettings() : ''}
       </main>
       <footer class="footer">
@@ -787,6 +832,93 @@ function renderPublishLive() {
   return parts.join('');
 }
 
+function renderMoments() {
+  const draft = state.moments.draft;
+  const images = state.moments.images;
+  const error = state.moments.error;
+  return `
+    <section class="card publish-card">
+      <div class="card-title-row">
+        <div>
+          <div class="card-title">发动态</div>
+          <div class="muted small">发布到博客的 /moments/ 页面，支持文字和图片；提交后自动构建部署。</div>
+        </div>
+        <div class="row-actions">
+          <input type="file" id="moment-images" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <button class="btn ghost" data-action="pick-moment-images" type="button">选择图片</button>
+        </div>
+      </div>
+      <form id="moment-form" class="form" autocomplete="off" onsubmit="return false">
+        <div class="field">
+          <label>内容 <em>*</em></label>
+          <textarea data-moment-field="text" rows="6" maxlength="${DEFAULTS.moments.maxText}" placeholder="今天发生了什么，或者随便说点什么…">${escapeHtml(draft.text)}</textarea>
+          <div class="hint"><span id="moment-text-count">${charLength(draft.text)}</span>/${DEFAULTS.moments.maxText}</div>
+          ${error && error.fields && error.fields.text ? `<div class="field-error">${escapeHtml(error.fields.text)}</div>` : ''}
+        </div>
+        <div class="field">
+          <label>时间</label>
+          <input type="datetime-local" data-moment-field="date" value="${escapeHtml(draft.date)}">
+          ${error && error.fields && error.fields.date ? `<div class="field-error">${escapeHtml(error.fields.date)}</div>` : ''}
+        </div>
+        <div class="field">
+          <label>图片（最多 ${DEFAULTS.moments.maxImages} 张，每张不超过 5MB）</label>
+          ${
+            images.length
+              ? `<div class="moment-grid">${images.map((image, index) => `
+                  <div class="moment-thumb">
+                    <img alt="动态图片 ${index + 1}" src="data:${escapeHtml(image.mime)};base64,${image.base64}">
+                    <button class="thumb-remove" data-action="remove-moment-image" data-index="${index}" type="button" title="移除">×</button>
+                  </div>`).join('')}</div>`
+              : '<div class="image-empty">还没有选择图片</div>'
+          }
+          ${error && error.fields && error.fields.images ? `<div class="field-error">${escapeHtml(error.fields.images)}</div>` : ''}
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" type="button" data-action="publish-moment" ${state.moments.saving ? 'disabled' : ''}>${state.moments.saving ? '正在发布…' : '发布动态'}</button>
+          <button class="btn ghost" type="button" data-action="clear-moment">清空</button>
+          <a class="link-btn" href="${escapeHtml(DEFAULTS.siteUrl)}/moments/" data-open>打开动态页</a>
+        </div>
+      </form>
+      <div id="moment-live">${renderMomentLive()}</div>
+    </section>
+  `;
+}
+
+function renderMomentLive() {
+  const moment = state.moments;
+  const parts = [];
+  if (moment.progress.length) {
+    parts.push(`<div class="progress-list">${moment.progress.map((item) => `<div class="progress-item"><span class="tick">✓</span>${escapeHtml(item.message || item.step)}</div>`).join('')}</div>`);
+  }
+  if (moment.error) {
+    parts.push(`
+      <div class="notice bad">
+        <strong>发布失败：</strong>${escapeHtml(moment.error.message || moment.error.code || '未知错误')}
+        ${moment.error.fields ? `<ul class="field-list">${Object.entries(moment.error.fields).map(([key, value]) => `<li>${escapeHtml(key)}：${escapeHtml(value)}</li>`).join('')}</ul>` : ''}
+      </div>
+    `);
+  }
+  if (moment.result) {
+    const result = moment.result;
+    let deployText = '';
+    if (moment.deploying) deployText = `正在等待部署…（已检测 ${moment.deployAttempts} 次，通常 1–3 分钟）`;
+    else if (moment.deployResult && moment.deployResult.deployed) deployText = '动态页已上线';
+    else if (moment.deployResult && moment.deployResult.timeout) deployText = '还未检测到上线，GitHub Actions 可能仍在构建，稍后刷新即可';
+    else if (moment.deployResult && moment.deployResult.cancelled) deployText = '已停止等待部署';
+    parts.push(`
+      <div class="notice ok">
+        <div><strong>已提交：</strong>${escapeHtml(formatDate(result.date))} → <a href="${escapeHtml(result.url)}" data-open>/moments/${escapeHtml(result.id)}/</a></div>
+        <div class="small muted">commit <a href="${escapeHtml(result.commitUrl)}" data-open>${escapeHtml((result.commitSha || '').slice(0, 7))}</a> · ${escapeHtml(deployText)}</div>
+        <div class="row-actions">
+          <button class="btn ghost small" data-action="open-moment" data-url="${escapeHtml(result.url)}">打开动态</button>
+          ${moment.deploying ? '<button class="btn ghost small" data-action="cancel-moment-deploy">停止等待</button>' : ''}
+        </div>
+      </div>
+    `);
+  }
+  return parts.join('');
+}
+
 function renderSettings() {
   const settings = state.settings;
   return `
@@ -919,6 +1051,10 @@ async function handleClick(event) {
   const target = event.target.closest('[data-action], [data-tab]');
   if (!target) return;
   if (target.dataset.tab) {
+    if (target.dataset.tab === 'moments' && !canMomentsNow()) {
+      showToast('请先在设置中保存 GitHub Token', 'err');
+      return;
+    }
     state.tab = target.dataset.tab;
     render();
     return;
@@ -953,6 +1089,28 @@ async function handleClick(event) {
   } else if (action === 'import-md') {
     const input = document.getElementById('import-file');
     if (input) input.click();
+  } else if (action === 'pick-moment-images') {
+    const input = document.getElementById('moment-images');
+    if (input) input.click();
+  } else if (action === 'remove-moment-image') {
+    state.moments.images.splice(Number(target.dataset.index), 1);
+    render();
+  } else if (action === 'publish-moment') {
+    await submitMoment();
+  } else if (action === 'clear-moment') {
+    state.moments.draft = freshMomentDraft();
+    state.moments.images = [];
+    state.moments.progress = [];
+    state.moments.error = null;
+    state.moments.result = null;
+    state.moments.deployResult = null;
+    state.moments.cancelDeploy = false;
+    platform.storage.set('momentDraft', null).catch(() => {});
+    render();
+  } else if (action === 'open-moment') {
+    platform.openExternal(target.dataset.url || '');
+  } else if (action === 'cancel-moment-deploy') {
+    state.moments.cancelDeploy = true;
   } else if (action === 'publish') {
     await submitPublish();
   } else if (action === 'clear-draft') {
@@ -978,6 +1136,7 @@ async function handleClick(event) {
       state.tokenPresent = false;
       state.tokenLogin = '';
       if (!canPublishNow() && state.tab === 'publish') state.tab = 'overview';
+      if (!canMomentsNow() && state.tab === 'moments') state.tab = 'overview';
       showToast('Token 已清除', 'ok');
       render();
     } catch (error) {
@@ -1019,6 +1178,14 @@ async function handleClick(event) {
 
 function handleInput(event) {
   const input = event.target;
+  if (input.dataset && input.dataset.momentField) {
+    const field = input.dataset.momentField;
+    state.moments.draft[field] = input.value;
+    const counter = document.getElementById('moment-text-count');
+    if (field === 'text' && counter) counter.textContent = String(charLength(input.value));
+    scheduleMomentDraftSave();
+    return;
+  }
   if (input.dataset && input.dataset.field) {
     const field = input.dataset.field;
     if (field === 'draft') return;
@@ -1036,6 +1203,11 @@ function handleInput(event) {
 
 function handleChange(event) {
   const input = event.target;
+  if (input.id === 'moment-images' && input.files && input.files.length) {
+    addMomentImages(input.files);
+    input.value = '';
+    return;
+  }
   if (input.id === 'cover-file' && input.files && input.files[0]) {
     loadCover(input.files[0]);
     return;
@@ -1098,6 +1270,181 @@ async function loadCover(file) {
   state.publish.draft.coverUrl = '';
   state.publish.error = null;
   render();
+}
+
+function scheduleMomentDraftSave() {
+  clearTimeout(state.momentDraftSaveTimer);
+  state.momentDraftSaveTimer = setTimeout(() => {
+    const draft = state.moments.draft;
+    if (!draft.text && !draft.date) return;
+    platform.storage.set('momentDraft', draft).catch(() => {});
+  }, 600);
+}
+
+async function addMomentImages(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  const room = DEFAULTS.moments.maxImages - state.moments.images.length;
+  if (room <= 0) {
+    showToast(`最多上传 ${DEFAULTS.moments.maxImages} 张图片`, 'err');
+    return;
+  }
+  const added = [];
+  for (const file of files.slice(0, room)) {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      showToast(`${file.name} 不是支持的图片格式`, 'err');
+      continue;
+    }
+    if (file.size > DEFAULTS.moments.maxImageBytes) {
+      showToast(`${file.name} 超过 5MB`, 'err');
+      continue;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      let base64 = String(dataUrl).replace(/^data:[^;]+;base64,/, '');
+      let mime = file.type;
+      let size = file.size;
+      if (file.size > 1.5 * 1024 * 1024) {
+        const compressed = await compressImage(dataUrl);
+        if (compressed && compressed.size < file.size) {
+          base64 = compressed.base64;
+          mime = compressed.mime;
+          size = compressed.size;
+        }
+      }
+      added.push({ base64, mime, name: file.name, size });
+    } catch (error) {
+      showToast(`${file.name} 读取失败`, 'err');
+    }
+  }
+  state.moments.images = state.moments.images.concat(added);
+  state.moments.error = null;
+  if (files.length > room) showToast(`最多上传 ${DEFAULTS.moments.maxImages} 张图片`, 'err');
+  render();
+}
+
+function compressImage(dataUrl, maxEdge = 1600, quality = 0.85) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const scale = Math.min(1, maxEdge / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (!blob) return resolve(null);
+          const reader = new FileReader();
+          reader.onload = () => resolve({
+            base64: String(reader.result).replace(/^data:[^;]+;base64,/, ''),
+            mime: 'image/jpeg',
+            size: blob.size,
+          });
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg', quality);
+      } catch (error) {
+        resolve(null);
+      }
+    };
+    image.onerror = () => resolve(null);
+    image.src = dataUrl;
+  });
+}
+
+async function submitMoment() {
+  if (state.moments.saving) return;
+  const moment = state.moments;
+  moment.error = null;
+  moment.result = null;
+  moment.progress = [];
+  moment.deployResult = null;
+  moment.cancelDeploy = false;
+
+  if (!state.tokenPresent) {
+    moment.error = { code: 'NO_TOKEN', message: '请先在设置中保存 GitHub Token' };
+    render();
+    return;
+  }
+
+  moment.saving = true;
+  render();
+  try {
+    const publisher = createMomentPublisher({
+      transport: platform.github,
+      config: { moments: DEFAULTS.moments },
+    });
+    const result = await publisher.publish(
+      { text: moment.draft.text, date: moment.draft.date, images: moment.images },
+      {
+        onProgress: (progress) => {
+          moment.progress.push(progress);
+          updateMomentLive();
+        },
+      },
+    );
+    moment.result = result;
+    moment.deploying = true;
+    moment.deployAttempts = 0;
+    moment.draft = freshMomentDraft();
+    moment.images = [];
+    await platform.storage.set('momentDraft', null).catch(() => {});
+    render();
+    if (state.settings.notifications) {
+      platform.notify('动态已提交', '已推送到仓库，正在等待部署');
+    }
+    pollMomentDeploy(result.id);
+  } catch (error) {
+    moment.error = {
+      code: error.code || 'ERROR',
+      message: error.message || String(error),
+      fields: error.fields,
+    };
+    render();
+  } finally {
+    moment.saving = false;
+    const button = document.querySelector('[data-action="publish-moment"]');
+    if (button) {
+      button.disabled = false;
+      button.textContent = '发布动态';
+    }
+    updateMomentLive();
+  }
+}
+
+async function pollMomentDeploy(id) {
+  const moment = state.moments;
+  try {
+    const result = await waitForMomentDeploy({
+      httpText: platform.httpText,
+      siteUrl: DEFAULTS.siteUrl,
+      id,
+      timeoutMs: DEFAULTS.intervals.deployTimeout,
+      intervalMs: DEFAULTS.intervals.deployPoll,
+      onTick: (attempts) => {
+        moment.deployAttempts = attempts;
+        updateMomentLive();
+      },
+      isCancelled: () => moment.cancelDeploy,
+    });
+    moment.deployResult = result;
+    if (result.deployed && state.settings.notifications) {
+      platform.notify('动态已上线', `${DEFAULTS.siteUrl}/moments/${id}/ 可以访问了`);
+    }
+  } catch (error) {
+    moment.deployResult = { deployed: false, timeout: true, error: error.message };
+  } finally {
+    moment.deploying = false;
+    updateMomentLive();
+  }
+}
+
+function updateMomentLive() {
+  const box = document.getElementById('moment-live');
+  if (!box) return;
+  box.innerHTML = renderMomentLive();
 }
 
 function readFileAsDataUrl(file) {
@@ -1310,7 +1657,7 @@ async function checkUpdates(manual) {
   if (manual) render();
   try {
     const result = await checkForUpdate({
-      httpText: platform.httpText,
+      httpText: githubText,
       repo: DEFAULTS.updates.repo,
       currentVersion: VERSION,
       kind: platform.kind,

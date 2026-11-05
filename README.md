@@ -1,6 +1,6 @@
 # Mobell 博客监控
 
-一个不依赖 DeepSeek Harness 的独立应用，用来实时查看 [mobellling.github.io](https://mobellling.github.io) 的数据，并可以直接把 Markdown 文章发布到博客的 GitHub 仓库。支持 Windows、Android，以及 iOS（源码 + 未签名 IPA 构建流程）。
+一个不依赖 DeepSeek Harness 的独立应用，用来实时查看 [mobellling.github.io](https://mobellling.github.io) 的数据，并可以直接把 Markdown 文章和日常动态发布到博客的 GitHub 仓库。支持 Windows、Android，以及 iOS（源码 + 未签名 IPA 构建流程）。
 
 ## 下载与构建产物
 
@@ -8,8 +8,8 @@ Windows / Android 安装包构建后位于 `dist/`，发布时上传到 GitHub R
 
 | 平台 | 文件 | 说明 |
 | --- | --- | --- |
-| Windows | `dist/windows/MobellMonitor-1.1.0-win64.zip` | 解压后运行 `MobellMonitor.exe`，免安装 |
-| Android | `dist/android/MobellMonitor-1.1.0.apk` | 直接安装，minSdk 26（Android 8.0+） |
+| Windows | `dist/windows/MobellMonitor-1.2.0-win64.zip` | 解压后运行 `MobellMonitor.exe`，免安装 |
+| Android | `dist/android/MobellMonitor-1.2.0.apk` | 直接安装，minSdk 26（Android 8.0+） |
 | iOS | `ios-app/` + `.github/workflows/ios-unsigned.yml` | XcodeGen 工程；在 macOS 构建并重签后安装 |
 
 Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主屏幕带 4×2 数据小组件；iOS 版是 WKWebView 外壳，复用同一份 `dist/web/app.html`，Token 存在 Keychain。
@@ -18,6 +18,7 @@ Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主�
 
 - **概览**：站点总访问量 / 独立访客、文章数、评论数、总字数、距上次上传时间、最近一次提交；文章表格支持按阅读、评论、字数、发布时间排序。
 - **发布**：在应用内写 Markdown 并通过 GitHub API 直接提交到 `src/data/post`，支持导入 `.md`、封面图片、标签、分类、草稿、URL slug 预览；提交后自动轮询 RSS 等待部署完成（最多 10 分钟）。**安卓 / iOS 未保存 Token 时不显示发布页**。
+- **动态**：发布类似 QQ 动态的短内容到博客 `/moments/`，支持最多 6 张图片、自定义时间；图片超过 1.5MB 会在本机压缩。**所有平台都需要先保存 Token 才显示动态页**，提交后轮询动态详情页直到部署完成。
 - **设置**：GitHub Token 管理、刷新间隔、桌面置顶 / 悬浮窗（Windows）、通知、检查更新。
 - **检查更新**：三个平台启动后自动检查 GitHub Releases，发现新版本弹窗提示更新内容；也可在“设置 → 版本与更新”手动检查，可对某个版本选择“稍后提醒”。
 - **桌面悬浮窗（Windows）**：无边框、半透明、置顶小窗，可拖动，显示 PV/UV、文章、评论、字数、距上次上传；托盘可随时开关。
@@ -60,10 +61,10 @@ Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主�
 
 ## 安卓使用
 
-1. 安装 `MobellMonitor-1.1.0.apk`（首次需允许“安装未知来源应用”）。
+1. 安装 `MobellMonitor-1.2.0.apk`（首次需允许“安装未知来源应用”）。
 2. 打开应用，首次同步约 10–20 秒。
 3. 添加小组件：长按桌面 → 小组件 → 找到“Mobell 博客监控” → 拖到桌面；点小组件刷新按钮可立即更新。
-4. 未保存 Token 时只显示“概览 / 设置”；在“设置”里保存 Token 后才会出现“发布”页。
+4. 未保存 Token 时只显示“概览 / 设置”；在“设置”里保存 Token 后才会出现“发布 / 动态”页。
 5. 安卓端通过 `@JavascriptInterface` 桥接原生 HTTP，网页本身不直接访问网络。
 
 ## iOS 使用
@@ -77,7 +78,7 @@ Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主�
    ```
    用 Xcode 选择自己的开发团队（个人 Apple ID 也可），连接 iPhone 运行即可。
 2. **没有 Mac**：把项目推到 GitHub，在 Actions 里手动运行 “iOS unsigned IPA”，下载 `MobellMonitor-unsigned.ipa`，再用 Sideloadly / AltStore 等工具用你的 Apple ID 重签安装（未签名 IPA 不能直接装）。
-3. 未保存 Token 时同样不显示发布页；Token 存入 Keychain。
+3. 未保存 Token 时同样不显示发布 / 动态页；Token 存入 Keychain。
 
 ## 发布更新（三个平台）
 
@@ -96,16 +97,16 @@ Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主�
    npm run pack:win
    .\android-app\gradlew.bat -p android-app distReleaseApk
    ```
-4. 在 GitHub 创建 Release，tag 用 `v1.1.0` 这种格式，并上传：
-   - `dist/windows/MobellMonitor-1.1.0-win64.zip`
-   - `dist/android/MobellMonitor-1.1.0.apk`
+4. 在 GitHub 创建 Release，tag 用 `v1.2.0` 这种格式，并上传：
+   - `dist/windows/MobellMonitor-1.2.0-win64.zip`
+   - `dist/android/MobellMonitor-1.2.0.apk`
    - （可选）iOS 的未签名 IPA
 5. 也可以直接用脚本发布（需要能创建 Release 的 `GITHUB_TOKEN`）：
    ```powershell
    $env:GITHUB_TOKEN = "ghp_xxx"
-   powershell -ExecutionPolicy Bypass -File scripts\push-release.ps1 -Version 1.1.0
+   powershell -ExecutionPolicy Bypass -File scripts\push-release.ps1 -Version 1.2.0
    ```
-   脚本会自动创建/更新 `v1.1.0` Release 并上传已构建的安装包。应用启动时或点击“检查更新”即可看到弹窗。
+   脚本会自动创建/更新 `v1.2.0` Release 并上传已构建的安装包。应用启动时或点击“检查更新”即可看到弹窗。
 
 > 注意：更新弹窗只负责提示和打开发布页/安装包下载地址，不会静默覆盖安装；Windows 解压替换、Android 覆盖安装、iOS 需要用 Mac 或重签工具重新安装。
 
@@ -120,7 +121,7 @@ npm install
 npm test
 npm run build:web      # 生成 dist/web/app.html（单文件，含 CSS/JS）
 npm run icon           # 生成 build/icon.png 与 build/icon.ico
-npm run pack:win       # 生成 dist/windows/MobellMonitor-1.1.0-win64.zip
+npm run pack:win       # 生成 dist/windows/MobellMonitor-1.2.0-win64.zip
 ```
 
 安卓构建需要 JDK 21、Android SDK platform 35 / build-tools 35。先安装 SDK，并用环境变量 `ANDROID_HOME` 或 `android-app/local.properties` 中的 `sdk.dir` 指向它。仓库**不包含**签名证书，需要在本机生成一份：
@@ -151,7 +152,7 @@ iOS 的 XcodeGen 工程在 `ios-app/`，构建步骤见上；`.github/workflows/
 ## 目录结构
 
 ```
-core/       共享 JS 核心：解析、数据源、发布、Markdown、更新检查（浏览器/Node 通用）
+core/       共享 JS 核心：解析、数据源、文章/动态发布、Markdown、更新检查（浏览器/Node 通用）
 web/        单页界面与平台适配层（Windows IPC / Android / iOS bridge / 浏览器演示）
 desktop/    Electron 主进程、preload、托盘与悬浮窗
 ios-app/    XcodeGen Swift 工程（WKWebView + Keychain + 原生 HTTP 桥）
@@ -177,4 +178,4 @@ dist/       构建产物（web / windows / android）
 npm test
 ```
 
-34 个测试覆盖：博客列表/文章/ RSS / Vercount / Discussions 解析、slug 规则、发布 frontmatter 与 Git Data API 原子提交、冲突重试、评论 API→HTML 回退、提交时间 RSS 回退、版本比较与更新检查。
+39 个测试覆盖：博客列表/文章/ RSS / Vercount / Discussions 解析、slug 规则、文章与动态 frontmatter / 图片路径、Git Data API 原子提交、冲突重试、评论 API→HTML 回退、提交时间 RSS 回退、版本比较与更新检查。
