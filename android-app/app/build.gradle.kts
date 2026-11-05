@@ -107,7 +107,7 @@ tasks.named("preBuild") {
 }
 
 // Copy the signed release APK to the shared dist/android directory, named
-// after the configured versionName (e.g. MobellMonitor-1.1.0.apk).
+// after the configured versionName (e.g. MobellMonitor-1.2.0.apk).
 val releaseVersionName: String = android.defaultConfig.versionName ?: "1.0.0"
 val distReleaseApk = tasks.register<Copy>("distReleaseApk") {
     group = "build"
