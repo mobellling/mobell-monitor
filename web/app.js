@@ -710,7 +710,7 @@ function renderPublish() {
           <div class="muted small">直接提交到 GitHub 仓库 master 分支，推送后自动构建部署。</div>
         </div>
         <div class="row-actions">
-          <input type="file" id="import-file" accept=".md,.mdx,text/markdown" hidden>
+          <input type="file" id="import-file" accept=".md,.mdx,text/markdown" class="file-picker-input" tabindex="-1" aria-hidden="true">
           <button class="btn ghost" data-action="import-md" type="button">导入 .md</button>
         </div>
       </div>
@@ -761,7 +761,7 @@ function renderPublish() {
           <div class="cover-row">
             ${cover ? `<img class="cover-thumb" alt="封面预览" src="data:${escapeHtml(cover.mime)};base64,${cover.base64}">` : '<div class="cover-thumb placeholder">无</div>'}
             <div class="cover-actions">
-              <input type="file" id="cover-file" accept="image/jpeg,image/png,image/webp" hidden>
+              <input type="file" id="cover-file" accept="image/jpeg,image/png,image/webp" class="file-picker-input" tabindex="-1" aria-hidden="true">
               <button class="btn ghost" type="button" data-action="pick-cover">选择图片</button>
               ${cover ? '<button class="btn ghost" type="button" data-action="clear-cover">移除</button>' : ''}
               <input data-field="coverUrl" value="${escapeHtml(draft.coverUrl)}" placeholder="或填写图片 URL">
@@ -844,7 +844,7 @@ function renderMoments() {
           <div class="muted small">发布到博客的 /moments/ 页面，支持文字和图片；提交后自动构建部署。</div>
         </div>
         <div class="row-actions">
-          <input type="file" id="moment-images" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <input type="file" id="moment-images" accept="image/jpeg,image/png,image/webp" multiple class="file-picker-input" tabindex="-1" aria-hidden="true">
           <button class="btn ghost" data-action="pick-moment-images" type="button">选择图片</button>
         </div>
       </div>
@@ -1041,6 +1041,22 @@ function bindEvents() {
   root.addEventListener('change', handleChange);
 }
 
+function openFilePicker(input) {
+  if (!input) return;
+  input.value = '';
+  // Android WebView sometimes ignores .click() on display:none file inputs.
+  // showPicker() is the modern path; fall back to click() for older WebViews.
+  if (typeof input.showPicker === 'function') {
+    try {
+      input.showPicker();
+      return;
+    } catch (error) {
+      // NotAllowedError / SecurityError -> use the legacy click path.
+    }
+  }
+  input.click();
+}
+
 async function handleClick(event) {
   const openLink = event.target.closest('[data-open]');
   if (openLink) {
@@ -1081,17 +1097,14 @@ async function handleClick(event) {
     state.sort = target.dataset.sort;
     render();
   } else if (action === 'pick-cover') {
-    const input = document.getElementById('cover-file');
-    if (input) input.click();
+    openFilePicker(document.getElementById('cover-file'));
   } else if (action === 'clear-cover') {
     state.publish.cover = null;
     render();
   } else if (action === 'import-md') {
-    const input = document.getElementById('import-file');
-    if (input) input.click();
+    openFilePicker(document.getElementById('import-file'));
   } else if (action === 'pick-moment-images') {
-    const input = document.getElementById('moment-images');
-    if (input) input.click();
+    openFilePicker(document.getElementById('moment-images'));
   } else if (action === 'remove-moment-image') {
     state.moments.images.splice(Number(target.dataset.index), 1);
     render();
@@ -1203,8 +1216,12 @@ function handleInput(event) {
 
 function handleChange(event) {
   const input = event.target;
-  if (input.id === 'moment-images' && input.files && input.files.length) {
-    addMomentImages(input.files);
+  if (input.id === 'moment-images') {
+    if (input.files && input.files.length) {
+      addMomentImages(input.files);
+    } else {
+      showToast('没有选择图片', 'err');
+    }
     input.value = '';
     return;
   }
@@ -1255,8 +1272,19 @@ function scheduleDraftSave() {
   }, 700);
 }
 
+function imageMimeFor(file) {
+  const declared = String(file.type || '').toLowerCase();
+  if (declared.startsWith('image/')) return declared;
+  const ext = String(file.name || '').split('.').pop().toLowerCase();
+  if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+  if (ext === 'png') return 'image/png';
+  if (ext === 'webp') return 'image/webp';
+  return '';
+}
+
 async function loadCover(file) {
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+  const mime = imageMimeFor(file);
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
     showToast('封面仅支持 JPG/PNG/WebP', 'err');
     return;
   }
@@ -1265,7 +1293,7 @@ async function loadCover(file) {
     return;
   }
   try {
-    const image = await prepareImage(file, { maxEdge: 1800, quality: 0.88 });
+    const image = await prepareImage(file, { maxEdge: 1800, quality: 0.88, type: mime });
     state.publish.cover = { base64: image.base64, mime: image.mime, name: image.name, size: image.size };
     state.publish.draft.coverUrl = '';
     state.publish.error = null;
@@ -1294,7 +1322,8 @@ async function addMomentImages(fileList) {
   }
   const added = [];
   for (const file of files.slice(0, room)) {
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    const mime = imageMimeFor(file);
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
       showToast(`${file.name} 不是支持的图片格式`, 'err');
       continue;
     }
@@ -1303,7 +1332,7 @@ async function addMomentImages(fileList) {
       continue;
     }
     try {
-      const image = await prepareImage(file, { maxEdge: 1600, quality: 0.86 });
+      const image = await prepareImage(file, { maxEdge: 1600, quality: 0.86, type: mime });
       added.push({ base64: image.base64, mime: image.mime, name: image.name, size: image.size });
     } catch (error) {
       showToast(`${file.name} 读取失败`, 'err');
@@ -1347,13 +1376,19 @@ function encodeImage(dataUrl, { mime, maxEdge = 1600, quality = 0.86 } = {}) {
   });
 }
 
-async function prepareImage(file, { maxEdge = 1600, quality = 0.86 } = {}) {
-  const dataUrl = await readFileAsDataUrl(file);
+async function prepareImage(file, { maxEdge = 1600, quality = 0.86, type = '' } = {}) {
+  const mime = type || file.type || 'image/jpeg';
+  let dataUrl = await readFileAsDataUrl(file);
+  if (mime && /^data:/i.test(dataUrl) && !dataUrl.toLowerCase().startsWith(`data:${mime}`)) {
+    // Some Android file managers report application/octet-stream; give the
+    // data URL the MIME type implied by the extension so <img> can decode it.
+    dataUrl = dataUrl.replace(/^data:[^;,]*/i, `data:${mime}`);
+  }
   const base64 = String(dataUrl).replace(/^data:[^;]+;base64,/, '');
-  const original = { base64, mime: file.type, size: file.size, name: file.name };
+  const original = { base64, mime, size: file.size, name: file.name || 'image' };
   const limit = DEFAULTS.publish.maxCoverBytes;
 
-  if (file.type === 'image/webp') {
+  if (mime === 'image/webp') {
     if (file.size > 1.5 * 1024 * 1024) {
       const shrunk = await encodeImage(dataUrl, { mime: 'image/webp', maxEdge, quality });
       if (shrunk && shrunk.size < file.size) return { ...shrunk, name: file.name };
