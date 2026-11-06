@@ -3,9 +3,9 @@
 原生 Kotlin + WebView 外壳，加载 `dist/web/app.html`（由主仓库 Web 构建产出，全部 CSS/JS 内联），并提供首页 AppWidget、JS Bridge、文件选择与通知等原生能力。
 
 - 包名 / applicationId：`com.mobell.monitor`
-- 版本：`1.3.1`（versionCode 5）
+- 版本：`1.3.2`（versionCode 6）
 - minSdk 26，compileSdk / targetSdk 35
-- 产物：`dist/android/MobellMonitor-1.3.1.apk`（已签名 release）
+- 产物：`dist/android/MobellMonitor-1.3.2.apk`（已签名 release）
 
 ## 环境要求
 
@@ -34,7 +34,7 @@ cd D:\my-blog\mobell-monitor
 # 仅构建 release APK（输出 app/build/outputs/apk/release/app-release.apk）
 & .tools\gradle-8.10.2\bin\gradle.bat -p android-app assembleRelease
 
-# 构建并复制到 dist/android/MobellMonitor-1.3.1.apk
+# 构建并复制到 dist/android/MobellMonitor-1.3.2.apk
 & .tools\gradle-8.10.2\bin\gradle.bat -p android-app distReleaseApk
 ```
 
@@ -64,10 +64,10 @@ keytool -genkeypair -keystore android-app\keystore\mobell-release.jks -alias mob
 
 ```powershell
 $sdk = 'D:\my-blog\mobell-monitor\.tools\android-sdk'
-& "$sdk\build-tools\35.0.0\apksigner.bat" verify --print-certs dist\android\MobellMonitor-1.3.1.apk
-& "$sdk\build-tools\35.0.0\aapt2.exe" dump badging dist\android\MobellMonitor-1.3.1.apk |
+& "$sdk\build-tools\35.0.0\apksigner.bat" verify --print-certs dist\android\MobellMonitor-1.3.2.apk
+& "$sdk\build-tools\35.0.0\aapt2.exe" dump badging dist\android\MobellMonitor-1.3.2.apk |
   Select-String 'package:|sdkVersion:|targetSdkVersion:'
-Get-FileHash dist\android\MobellMonitor-1.3.1.apk -Algorithm SHA256
+Get-FileHash dist\android\MobellMonitor-1.3.2.apk -Algorithm SHA256
 ```
 
 ## 结构
