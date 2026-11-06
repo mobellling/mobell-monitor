@@ -10,11 +10,11 @@ Windows / Android 安装包构建后位于 `dist/`，发布时上传到 GitHub R
 
 | 平台 | 文件 | 说明 |
 | --- | --- | --- |
-| Windows | `dist/windows/MobellMonitor-1.3.1-win64.zip` | 解压后运行 `MobellMonitor.exe`，免安装 |
-| Android | `dist/android/MobellMonitor-1.3.1.apk` | 直接安装，minSdk 26（Android 8.0+） |
+| Windows | `dist/windows/MobellMonitor-1.3.2-win64.zip` | 解压后运行 `MobellMonitor.exe`，免安装 |
+| Android | `dist/android/MobellMonitor-1.3.2.apk` | 直接安装，minSdk 26（Android 8.0+） |
 | iOS | `ios-app/` + `.github/workflows/ios-unsigned.yml` | XcodeGen 工程；在 macOS 构建并重签后安装 |
 
-Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主屏幕带 4×2 数据小组件；iOS 版是 WKWebView 外壳，复用同一份 `dist/web/app.html`，Token 存在 Keychain。
+Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主屏幕带 4×2 数据小组件；iOS 版是 WKWebView 外壳，复用同一份 `dist/web/app.html`，Token 存在 Keychain。iOS 1.3.2 起适配状态栏安全区，并通过原生桥接提供照片/文件选择器（不依赖 WKWebView 自带文件输入）。
 
 ## 功能
 
@@ -63,7 +63,7 @@ Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主�
 
 ## 安卓使用
 
-1. 安装 `MobellMonitor-1.3.1.apk`（首次需允许“安装未知来源应用”）。
+1. 安装 `MobellMonitor-1.3.2.apk`（首次需允许“安装未知来源应用”）。
 2. 打开应用，首次同步约 10–20 秒。
 3. 添加小组件：长按桌面 → 小组件 → 找到“Mobell 博客监控” → 拖到桌面；点小组件刷新按钮可立即更新。
 4. 未保存 Token 时只显示“概览 / 设置”；在“设置”里保存 Token 后才会出现“发布 / 动态”页。
@@ -88,6 +88,7 @@ Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主�
    5. 手机上打开“设置 → 通用 → VPN 与设备管理”，信任你的开发者证书；
    6. 免费 Apple ID 签名的应用 **7 天后过期**，每周重新拖一次 IPA 重签即可；付费开发者证书可一年。
 4. 未保存 Token 时同样不显示发布 / 动态页；Token 存入 Keychain。
+5. 发动态选择图片时，首次会弹出“照片图库 / 文件”菜单；照片会在原生层压缩为 JPEG 再交给网页层转 WebP。
 
 ## 发布更新（三个平台）
 
@@ -106,16 +107,16 @@ Windows 版是 Electron 应用；安卓版是原生 Kotlin WebView 应用，主�
    npm run pack:win
    .\android-app\gradlew.bat -p android-app distReleaseApk
    ```
-4. 在 GitHub 创建 Release，tag 用 `v1.3.1` 这种格式，并上传：
-   - `dist/windows/MobellMonitor-1.3.1-win64.zip`
-   - `dist/android/MobellMonitor-1.3.1.apk`
+4. 在 GitHub 创建 Release，tag 用 `v1.3.2` 这种格式，并上传：
+   - `dist/windows/MobellMonitor-1.3.2-win64.zip`
+   - `dist/android/MobellMonitor-1.3.2.apk`
    - （可选）iOS 的未签名 IPA
 5. 也可以直接用脚本发布（需要能创建 Release 的 `GITHUB_TOKEN`）：
    ```powershell
    $env:GITHUB_TOKEN = "ghp_xxx"
-   powershell -ExecutionPolicy Bypass -File scripts\push-release.ps1 -Version 1.3.1
+   powershell -ExecutionPolicy Bypass -File scripts\push-release.ps1 -Version 1.3.2
    ```
-   脚本会自动创建/更新 `v1.3.1` Release 并上传已构建的安装包。应用启动时或点击“检查更新”即可看到弹窗。
+   脚本会自动创建/更新 `v1.3.2` Release 并上传已构建的安装包。应用启动时或点击“检查更新”即可看到弹窗。
 
 > 注意：更新弹窗只负责提示和打开发布页/安装包下载地址，不会静默覆盖安装；Windows 解压替换、Android 覆盖安装、iOS 需要用 Mac 或重签工具重新安装。
 
@@ -130,7 +131,7 @@ npm install
 npm test
 npm run build:web      # 生成 dist/web/app.html（单文件，含 CSS/JS）
 npm run icon           # 生成 build/icon.png 与 build/icon.ico
-npm run pack:win       # 生成 dist/windows/MobellMonitor-1.3.1-win64.zip
+npm run pack:win       # 生成 dist/windows/MobellMonitor-1.3.2-win64.zip
 ```
 
 安卓构建需要 JDK 21、Android SDK platform 35 / build-tools 35。先安装 SDK，并用环境变量 `ANDROID_HOME` 或 `android-app/local.properties` 中的 `sdk.dir` 指向它。仓库**不包含**签名证书，需要在本机生成一份：
