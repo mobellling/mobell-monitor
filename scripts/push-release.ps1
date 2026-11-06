@@ -1,4 +1,4 @@
-# 推送一个可被应用检查到的新版本
+﻿# 推送一个可被应用检查到的新版本
 #
 # 用法：
 #   $env:GITHUB_TOKEN = "ghp_xxx"      # 需要 repo 权限的 Token（能创建 Release）
