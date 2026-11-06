@@ -2,6 +2,8 @@
 
 一个不依赖 DeepSeek Harness 的独立应用，用来实时查看 [mobellling.github.io](https://mobellling.github.io) 的数据，并可以直接把 Markdown 文章和日常动态发布到博客的 GitHub 仓库。支持 Windows、Android，以及 iOS（源码 + 未签名 IPA 构建流程）。
 
+网页只读版：<https://mobellling.github.io/mobell-monitor/>（GitHub Pages，源码位于 `site/`，运行 `npm run build:site` 更新）。
+
 ## 下载与构建产物
 
 Windows / Android 安装包构建后位于 `dist/`，发布时上传到 GitHub Releases；iOS 为源码交付，不在 Windows 上生成二进制：
