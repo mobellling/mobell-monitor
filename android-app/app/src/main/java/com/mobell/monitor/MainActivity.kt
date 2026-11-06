@@ -77,8 +77,11 @@ class MainActivity : ComponentActivity() {
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = false
-            allowFileAccess = false
-            allowContentAccess = false
+            // The file picker returns content:// URIs. WebView must be allowed
+            // to read content providers, otherwise <input type="file"> looks
+            // dead on Android (the picker opens, but the selection is dropped).
+            allowFileAccess = true
+            allowContentAccess = true
             @Suppress("DEPRECATION")
             allowUniversalAccessFromFileURLs = false
             @Suppress("DEPRECATION")
@@ -118,10 +121,7 @@ class MainActivity : ComponentActivity() {
                 fileChooserCallback?.onReceiveValue(null)
                 fileChooserCallback = filePathCallback
                 return try {
-                    val intent = fileChooserParams.createIntent().apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                    }
-                    fileChooserLauncher.launch(intent)
+                    fileChooserLauncher.launch(buildFileChooserIntent(fileChooserParams))
                     true
                 } catch (t: Throwable) {
                     fileChooserCallback = null
@@ -180,6 +180,32 @@ class MainActivity : ComponentActivity() {
         bridge = null
         html = null
         super.onDestroy()
+    }
+
+    /**
+     * ACTION_OPEN_DOCUMENT is more predictable than createIntent() across
+     * OEM pickers: it always returns a readable content:// URI and supports
+     * multi-select for the moments image picker.
+     */
+    private fun buildFileChooserIntent(params: WebChromeClient.FileChooserParams): Intent {
+        val accept = params.acceptTypes
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            .orEmpty()
+        val mimeTypes = accept.filter { it.contains('/') }
+        val hasExtensionOnly = accept.any { !it.contains('/') }
+        return Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            if (mimeTypes.isNotEmpty() && !hasExtensionOnly) {
+                putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+            }
+            putExtra(
+                Intent.EXTRA_ALLOW_MULTIPLE,
+                params.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE,
+            )
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
     }
 
     private fun readWebAsset(): String? = runCatching {
