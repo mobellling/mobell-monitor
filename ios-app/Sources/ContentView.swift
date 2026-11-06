@@ -21,8 +21,8 @@ struct ContentView: UIViewRepresentable {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         let filePicker = FilePicker()
         filePicker.webView = webView
-        webView.uiDelegate = filePicker
         context.coordinator.filePicker = filePicker
+        bridge.filePicker = filePicker
         bridge.webView = webView
         context.coordinator.bridge = bridge
 

@@ -404,6 +404,9 @@ function iosPlatform(handler) {
     async testToken() {
       return this.github.request({ method: 'GET', path: '/user' });
     },
+    pickFiles(kind, multiple) {
+      return nativeCall('pickFiles', [kind, Boolean(multiple)], 120000);
+    },
     token: {
       async has() {
         try {

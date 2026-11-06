@@ -1051,9 +1051,33 @@ function bindEvents() {
   root.addEventListener('change', handleChange);
 }
 
-function openFilePicker(input) {
+async function openFilePicker(input) {
   if (!input) return;
   input.value = '';
+  // WKWebView (before iOS 18.4) cannot open <input type="file"> itself, so the
+  // iOS shell provides the photo/document picker through the native bridge.
+  if (platform.kind === 'ios' && typeof platform.pickFiles === 'function') {
+    try {
+      const documents = input.id === 'import-file';
+      const payload = await platform.pickFiles(
+        documents ? 'files' : 'images',
+        input.id === 'moment-images',
+      );
+      const files = (payload.files || []).map(fileFromNative).filter(Boolean);
+      if (!files.length) return;
+      if (input.id === 'cover-file') {
+        await loadCover(files[0]);
+      } else if (input.id === 'import-file') {
+        await importMarkdown(files[0]);
+      } else {
+        await addMomentImages(files);
+      }
+      return;
+    } catch (error) {
+      showToast(error.message || '无法打开选择器', 'err');
+      return;
+    }
+  }
   // Android WebView sometimes ignores .click() on display:none file inputs.
   // showPicker() is the modern path; fall back to click() for older WebViews.
   if (typeof input.showPicker === 'function') {
@@ -1065,6 +1089,22 @@ function openFilePicker(input) {
     }
   }
   input.click();
+}
+
+function fileFromNative(entry) {
+  if (!entry || !entry.dataBase64) return null;
+  try {
+    const binary = atob(entry.dataBase64);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+    return new File([bytes], entry.name || 'file', {
+      type: entry.mime || 'application/octet-stream',
+    });
+  } catch (error) {
+    return null;
+  }
 }
 
 async function handleClick(event) {

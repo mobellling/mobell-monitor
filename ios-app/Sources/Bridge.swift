@@ -6,6 +6,7 @@ import WebKit
 @MainActor
 final class Bridge: NSObject, WKScriptMessageHandler {
     weak var webView: WKWebView?
+    var filePicker: FilePicker?
 
     private let tokenStore = TokenStore()
     private let allowedHosts: Set<String> = [
@@ -101,6 +102,13 @@ final class Bridge: NSObject, WKScriptMessageHandler {
                 _ = await UIApplication.shared.open(url)
             }
             return ["ok": true]
+
+        case "pickFiles":
+            let kind = (args.first as? String) ?? "images"
+            let multiple = (args.count >= 2 ? args[1] as? Bool : false) ?? false
+            guard let picker = filePicker else { return fail("选择器不可用") }
+            let files = await picker.present(kind: kind, multiple: multiple)
+            return ["ok": true, "files": files]
 
         case "updateWidget":
             return ["ok": true]
