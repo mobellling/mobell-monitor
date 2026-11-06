@@ -6,6 +6,7 @@
   "main": "desktop/main.js",
   "scripts": {
     "build:web": "node scripts/build-web.js",
+    "build:site": "npm run build:web && node scripts/build-site.js",
     "start": "npm run build:web && electron .",
     "test": "node --test \"test/*.test.js\"",
     "pack:win": "npm run build:web && node scripts/pack-win.js",

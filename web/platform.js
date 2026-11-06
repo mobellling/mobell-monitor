@@ -77,8 +77,24 @@ function browserPlatform() {
       }
     },
     github: {
-      async request() {
-        throw new Error('浏览器预览模式不支持 GitHub 操作，请使用桌面版或安卓版');
+      async request({ method = 'GET', path }) {
+        if (method !== 'GET') {
+          throw new Error('网页预览版为只读模式，发布请使用桌面版或移动端');
+        }
+        const response = await fetch(`https://api.github.com${path}`, {
+          headers: {
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+          credentials: 'omit',
+        });
+        let json = null;
+        try {
+          json = await response.json();
+        } catch (error) {
+          json = null;
+        }
+        return { status: response.status, json };
       },
     },
     async testToken() {

@@ -142,12 +142,16 @@ function isMobile() {
   return platform.kind === 'android' || platform.kind === 'ios';
 }
 
+function isBrowserPreview() {
+  return platform.kind === 'browser';
+}
+
 function canPublishNow() {
-  return !isMobile() || Boolean(state.tokenPresent);
+  return !isBrowserPreview() && (!isMobile() || Boolean(state.tokenPresent));
 }
 
 function canMomentsNow() {
-  return Boolean(state.tokenPresent);
+  return !isBrowserPreview() && Boolean(state.tokenPresent);
 }
 
 function updateVisible() {
@@ -545,6 +549,7 @@ function renderShell() {
           <div id="sync-status" class="status">${renderStatusInner()}</div>
           <button class="btn ghost" data-action="refresh" ${state.loading.counters || state.loading.content ? 'disabled' : ''}>刷新</button>
           ${platform.kind === 'windows' ? '<button class="btn ghost" data-action="toggle-mini">悬浮窗</button>' : ''}
+          ${platform.demo ? '<a class="btn ghost" href="https://github.com/mobellling/mobell-monitor/releases" data-open>下载客户端</a>' : ''}
         </div>
       </header>
       <nav class="tabs">
@@ -608,7 +613,7 @@ function renderOverview() {
   const stale = isStale();
   return `
     ${stale ? '<div class="notice warn">数据可能已过期，点击右上角“刷新”更新。</div>' : ''}
-    ${platform.demo ? '<div class="notice">浏览器预览模式：GitHub 页面可能因跨域无法读取，桌面版/安卓版功能完整。</div>' : ''}
+    ${platform.demo ? '<div class="notice">网页版为只读预览：可查看访问量、文章、评论与字数；发布和动态请使用桌面版或移动端。GitHub 匿名接口有频率限制，失败时会保留上次数据。</div>' : ''}
     <section class="hero card">
       <div class="hero-main">
         <div class="metric-label">站点总访问</div>
@@ -925,6 +930,10 @@ function renderSettings() {
     <section class="card">
       <div class="card-title">GitHub 发布</div>
       <div class="muted small">仓库 ${escapeHtml(DEFAULTS.publish.owner)}/${escapeHtml(DEFAULTS.publish.repo)} · 分支 ${escapeHtml(DEFAULTS.publish.branch)}</div>
+      ${isBrowserPreview() ? `
+        <p class="muted small">网页版为只读预览，不支持保存 Token、发布文章或发动态。需要发布请使用 Windows / Android / iOS 客户端。</p>
+        <p class="small"><a class="link-btn" href="https://github.com/mobellling/mobell-monitor/releases" data-open>前往下载客户端</a></p>
+      ` : `
       <div class="token-box">
         <div class="token-status">
           <span class="dot ${state.tokenPresent ? 'ok' : 'warn'}"></span>
@@ -941,6 +950,7 @@ function renderSettings() {
         </div>
         <p class="hint">Token 只保存在本机（Windows 使用系统加密，安卓使用 Keystore，iOS 使用钥匙串），不会写入网页或日志；仅需该仓库 Contents 的读写权限。${isMobile() ? '安卓 / iOS 在未保存 Token 时不会显示发布页。' : ''}</p>
       </div>
+      `}
     </section>
 
     <section class="card">
