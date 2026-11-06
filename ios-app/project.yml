@@ -23,8 +23,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mobell.monitor
         PRODUCT_NAME: MobellMonitor
-        MARKETING_VERSION: "1.3.0"
-        CURRENT_PROJECT_VERSION: "4"
+        MARKETING_VERSION: "1.3.2"
+        CURRENT_PROJECT_VERSION: "6"
         INFOPLIST_FILE: Info.plist
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic

@@ -19,6 +19,10 @@ struct ContentView: UIViewRepresentable {
         webView.backgroundColor = .clear
         webView.scrollView.bounces = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
+        let filePicker = FilePicker()
+        filePicker.webView = webView
+        webView.uiDelegate = filePicker
+        context.coordinator.filePicker = filePicker
         bridge.webView = webView
         context.coordinator.bridge = bridge
 
@@ -34,5 +38,6 @@ struct ContentView: UIViewRepresentable {
 
     final class Coordinator {
         var bridge: Bridge?
+        var filePicker: FilePicker?
     }
 }
